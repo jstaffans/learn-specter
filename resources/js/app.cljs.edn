@@ -1,0 +1,3 @@
+{:require  [learn-specter.app]
+ :init-fns [learn-specter.app/init]
+ :compiler-options {:asset-path "js/app.out"}}
