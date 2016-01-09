@@ -50,7 +50,7 @@
     [:h2 "Excercises"]
     [dataset]
     [editor]]
-   [:div.col-md-4
+   [:div.col-md-4.result
     "Result"]])
 
 (defn init []
