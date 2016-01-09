@@ -10,7 +10,8 @@
                   [reagent "0.5.0"]
                   [re-frame "0.7.0-alpha"]
                   [com.rpl/specter "0.9.1"]
-                  [cljsjs/codemirror "5.8.0-0"]])
+                  [cljsjs/codemirror "5.8.0-0"]
+                  [markdown-clj "0.9.85"]])
 
 (require
   '[adzerk.boot-cljs :refer [cljs]]

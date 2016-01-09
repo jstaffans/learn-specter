@@ -6,12 +6,13 @@
             [cljsjs.codemirror.mode.clojure]
             [cljsjs.codemirror.addon.edit.matchbrackets]
             [cljsjs.codemirror.addon.fold.foldgutter]
-            [cljsjs.codemirror.addon.edit.closebrackets]))
+            [cljsjs.codemirror.addon.edit.closebrackets]
+            [learn-specter.util :refer [debounce]]))
 
 (def opts {:matchBrackets true
            :lineNumbers false
            :autoCloseBrackets true
-           :theme "monokai"
+           :theme "neat"
            :mode "clojure"
            :lineWrapping true})
 
@@ -26,7 +27,7 @@
             (.log js/console (:value result))
             result))))
 
-(defn cm-editor
+(defn editor
   []
   (reagent/create-class
     {:component-did-mount
@@ -36,7 +37,7 @@
              opts (clj->js opts)
              editor (.fromTextArea js/CodeMirror dom-node opts)]
 
-         (.on editor "change" #(eval-str (.getValue editor)))))
+         (.on editor "change" (debounce #(eval-str (.getValue editor))))))
 
      :reagent-render
      (fn [_]

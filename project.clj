@@ -6,5 +6,6 @@
   :dependencies [[org.clojure/clojurescript "1.7.228"]
                  [reagent "0.5.0"]
                  [re-frame "0.7.0-alpha"]
-                 [com.rpl/specter "0.9.1"]])
+                 [com.rpl/specter "0.9.1"]
+                 [markdown-clj "0.9.85"]])
 

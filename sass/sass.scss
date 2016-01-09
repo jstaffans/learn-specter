@@ -2,13 +2,14 @@
 @import 'bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
 @import 'bower_components/bootswatch/readable/bootswatch';
 @import 'bower_components/codemirror/lib/codemirror';
-@import 'bower_components/codemirror/theme/monokai';
+@import 'bower_components/codemirror/theme/neat';
 
-$font-size-base: 1.1em;
+$font-size-base: 1.0em;
 $primary-color:  #333;
 
 body {
 	color: $primary-color;
+	padding: 0 20px;
 }
 
 div, p, span {
