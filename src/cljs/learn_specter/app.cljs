@@ -1,7 +1,8 @@
 (ns learn-specter.app
   (:require-macros [learn-specter.macros :refer [defedn]]
                    [reagent.ratom :refer [reaction]])
-  (:require [reagent.core :as reagent]
+  (:require [cljs.pprint :refer [pprint]]
+            [reagent.core :as reagent]
             [re-frame.core :refer [register-handler register-sub subscribe dispatch dispatch-sync]]
             [com.rpl.specter :as s]))
 
@@ -24,7 +25,7 @@
     (fn dataset-renderer
       []
       [:div
-       "First movie: " (:name @first-movie)])))
+       "First movie: " (with-out-str (pprint @first-movie))])))
 
 (defn init []
   (dispatch-sync [:initialize])
