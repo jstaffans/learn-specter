@@ -6,7 +6,7 @@
                   [adzerk/boot-reload "0.4.1" :scope "test"]
                   [pandeiro/boot-http "0.6.3" :scope "test"]
                   [mathias/boot-sassc "0.1.1" :scope "test"]
-                  [org.clojure/clojurescript "1.7.122"]
+                  [org.clojure/clojurescript "1.7.228"]
                   [reagent "0.5.0"]
                   [re-frame "0.7.0-alpha"]
                   [com.rpl/specter "0.9.1"]])
