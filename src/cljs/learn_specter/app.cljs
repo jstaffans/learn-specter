@@ -4,7 +4,10 @@
   (:require [cljs.pprint :refer [pprint]]
             [reagent.core :as reagent]
             [re-frame.core :refer [register-handler register-sub subscribe dispatch dispatch-sync]]
-            [com.rpl.specter :as s]))
+            [com.rpl.specter :as s]
+            [learn-specter.editor :refer [cm-editor]]))
+
+(enable-console-print!)
 
 (defedn movies "movies.edn")
 
@@ -27,8 +30,16 @@
       [:div
        "First movie: " (with-out-str (pprint @first-movie))])))
 
+(defn editor
+  []
+  [cm-editor])
+
+(defn lesson
+  []
+  [:div [dataset editor]])
+
 (defn init []
   (dispatch-sync [:initialize])
   (reagent/render-component
-    [dataset]
+    [editor]
     (.getElementById js/document "container")))

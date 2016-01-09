@@ -9,7 +9,8 @@
                   [org.clojure/clojurescript "1.7.228"]
                   [reagent "0.5.0"]
                   [re-frame "0.7.0-alpha"]
-                  [com.rpl/specter "0.9.1"]])
+                  [com.rpl/specter "0.9.1"]
+                  [cljsjs/codemirror "5.8.0-0"]])
 
 (require
   '[adzerk.boot-cljs :refer [cljs]]
