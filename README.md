@@ -3,7 +3,7 @@ learn-specter
 
 An interactive tutorial to the [Specter] [1] library.
 
-### Development 
+## Development 
 
 For compiling learn-specter the following is needed:
 
@@ -11,7 +11,7 @@ For compiling learn-specter the following is needed:
 * [sassc] [3], version 3.2.5 or greater. `brew install sassc` should do it on OS X.
 * [bower] [4], for retrieving some frontend dependencies like Bootstrap.
 
-### License
+## License
 
 Distributed under the MIT License - see LICENSE for the full license.
 
