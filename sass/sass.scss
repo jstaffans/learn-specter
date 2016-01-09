@@ -1,7 +1,14 @@
-$font-stack:    Helvetica, sans-serif;
-$primary-color: #333;
+@import 'bower_components/bootswatch/readable/variables';
+@import 'bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
+@import 'bower_components/bootswatch/readable/bootswatch';
+
+$font-size-base: 1.1em;
+$primary-color:  #333;
 
 body {
-  font: 100% $font-stack;
-  color: $primary-color;
+	color: $primary-color;
+}
+
+div, p, span {
+	font-size: $font-size-base;
 }

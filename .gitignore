@@ -1,3 +1,5 @@
-/target
-/.nrepl-port
+bower_components
+.nrepl-port
+.nrepl-history
+target
 out

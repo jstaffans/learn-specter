@@ -4,5 +4,6 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[reagent "0.5.0"]
+                 [re-frame "0.7.0-alpha"]
                  [com.rpl/specter "0.9.1"]])
 

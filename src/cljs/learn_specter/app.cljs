@@ -1,22 +1,33 @@
 (ns learn-specter.app
-  (:require-macros [learn-specter.macros :refer [defedn]])
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require-macros [learn-specter.macros :refer [defedn]]
+                   [reagent.ratom :refer [reaction]])
+  (:require [reagent.core :as reagent]
+            [re-frame.core :refer [register-handler register-sub subscribe dispatch dispatch-sync]]
             [com.rpl.specter :as s]))
 
 (defedn movies "movies.edn")
 
-(defn some-component []
-  [:div
-   [:h3 "I am a component"]
-   [:p.someclass
-    "I have " [:strong "bold"]
-    [:span {:style {:color "red"}} " and red"]
-    " text."]])
+(register-handler
+  :initialize
+  (fn [db _]
+    (merge db {:movies movies})))
 
-(defn calling-component []
-  [:div "Parent component"
-   [some-component]])
+(register-sub
+  :current-dataset
+  (fn [db _]
+    (reaction (:movies @db))))
+
+(defn dataset
+  []
+  (let [ds (subscribe [:current-dataset])
+        first-movie (reaction (first @ds))]
+    (fn dataset-renderer
+      []
+      [:div
+       "First movie: " (:name @first-movie)])))
 
 (defn init []
-  (reagent/render-component [calling-component]
-                            (.getElementById js/document "container")))
+  (dispatch-sync [:initialize])
+  (reagent/render-component
+    [dataset]
+    (.getElementById js/document "container")))
