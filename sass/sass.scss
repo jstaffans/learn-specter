@@ -22,9 +22,8 @@ button.eval {
 }
 
 .result {
-	background-image: linear-gradient(0deg, #D7E0F4, #D6D6D6);
-
 	@media (min-width: $screen-md-min) {
+		background-image: linear-gradient(0deg, #D7E0F4, #D6D6D6);
 		position: fixed;
 		top: 0;
 		right: 0;
