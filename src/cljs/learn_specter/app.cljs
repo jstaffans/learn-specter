@@ -26,7 +26,7 @@
 (register-handler
   :show-page
   (fn [db [_ page-id]]
-    (assoc db :current-page page-id)))
+    (assoc db :current-page page-id :current-input nil)))
 
 (register-handler
   :input-changed
@@ -82,7 +82,7 @@
 
 (defn eval-button
   []
-  [:button.btn.btn-primary.eval "Evaluate"])
+  [:button.btn.btn-primary.eval {:on-click #(dispatch [:eval-clicked])} "Evaluate"])
 
 (defn excercises
   []
