@@ -4,8 +4,8 @@
             [pushy.core :as pushy]))
 
 (def routes
-  ["" {""                    :index
-       ["/page/" [long :id]] :page}])
+  ["/" {""                   :index
+        ["page/" [long :id]] :page}])
 
 (defn- dispatch-route [match]
   (case (:handler match)
