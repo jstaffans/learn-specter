@@ -16,6 +16,11 @@ div, p, span {
 	font-size: $font-size-base;
 }
 
+button.eval {
+	width: 100%;
+	margin-bottom: 20px;
+}
+
 .result {
 	background-image: linear-gradient(0deg, #D7E0F4, #D6D6D6);
 
@@ -26,6 +31,10 @@ div, p, span {
 		padding-top: 20px;
 		height: 100%;
 	}
+}
+
+pre {
+	font-size: 0.8em;
 }
 
 .CodeMirror {

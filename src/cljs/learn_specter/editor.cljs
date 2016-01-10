@@ -1,7 +1,6 @@
 (ns learn-specter.editor
   (:require [reagent.core :as reagent]
-            [cljs.js :refer [empty-state eval js-eval]]
-            [cljs.tools.reader :refer [read-string]]
+            [re-frame.core :refer [dispatch]]
             [cljsjs.codemirror]
             [cljsjs.codemirror.mode.clojure]
             [cljsjs.codemirror.addon.edit.matchbrackets]
@@ -16,17 +15,6 @@
            :mode "clojure"
            :lineWrapping true})
 
-(defn eval-str
-  [s]
-  (eval (empty-state)
-        (read-string s)
-        {:eval       js-eval
-         :context    :expr}
-        (fn [result]
-          (do
-            (.log js/console (:value result))
-            result))))
-
 (defn editor
   []
   (reagent/create-class
@@ -37,7 +25,7 @@
              opts (clj->js opts)
              editor (.fromTextArea js/CodeMirror dom-node opts)]
 
-         (.on editor "change" (debounce #(eval-str (.getValue editor))))))
+         (.on editor "change" #(dispatch [:input-changed (.getValue editor)]))))
 
      :reagent-render
      (fn [_]

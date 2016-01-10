@@ -3,7 +3,7 @@
 
 (defedn movies "movies.edn")
 
-(def excercises
+(def page-excercises
   [{:dataset    movies
     :excercises [{:text     "Convert all names to upper case"
                   :hint     "(s/transform ...)"
