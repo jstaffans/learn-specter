@@ -1,16 +1,15 @@
 (ns learn-specter.app
-  (:require-macros [learn-specter.macros :refer [defedn defcontent]]
+  (:require-macros [learn-specter.macros :refer [defcontent]]
                    [reagent.ratom :refer [reaction]])
   (:require [cljs.pprint :refer [pprint]]
             [reagent.core :as reagent]
             [re-frame.core :refer [register-handler register-sub subscribe dispatch dispatch-sync]]
             [com.rpl.specter :as s]
             [learn-specter.editor :refer [editor]]
-            [learn-specter.routes :as routes]))
+            [learn-specter.routes :as routes]
+            [learn-specter.excercises :refer [excercises]]))
 
 (enable-console-print!)
-
-(defedn movies "movies.edn")
 
 (defcontent pages "./src/md")
 
@@ -19,8 +18,8 @@
 (register-handler
   :initialize
   (fn [db _]
-    (merge db {:movies       movies
-               :content      pages
+    (merge db {:content      pages
+               :excercises   excercises
                :current-page 0})))
 
 (register-handler
@@ -33,7 +32,9 @@
 (register-sub
   :current-dataset
   (fn [db _]
-    (reaction (:movies @db))))
+    (let [excercises (reaction (:excercises @db))
+          current-page (reaction (:current-page @db))]
+      (reaction (get-in @excercises [@current-page :dataset])))))
 
 (register-sub
   :current-page
@@ -44,7 +45,7 @@
         {:html  (get @content @current-page)
          :links (merge {}
                   (when (< @current-page (-> @content count dec)) {:next (routes/path-for :page :id (inc @current-page))})
-                  (when (> @current-page 0) {:previous (routes/path-for :page :id (dec @current-page))}))}))))
+                  (when (> @current-page 0) {:prev (routes/path-for :page :id (dec @current-page))}))}))))
 
 (defn content
   []
@@ -92,3 +93,4 @@
   (reagent/render-component
     [lesson]
     (.getElementById js/document "container")))
+
