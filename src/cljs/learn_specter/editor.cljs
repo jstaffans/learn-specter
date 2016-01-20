@@ -20,7 +20,7 @@
 
 (defn editor
   []
-  (fn [dataset editor-content]
+  (fn [editor-content]
     (reagent/create-class
       {:component-did-mount
        (fn [this]

@@ -10,6 +10,7 @@
             [learn-specter.routes :as routes]
             [learn-specter.excercises :refer [page-excercises]]))
 
+
 (enable-console-print!)
 
 (defpages pages "./src/md")
@@ -83,8 +84,8 @@
      [:pre (-> first-movies pprint with-out-str add-ellipse)]]))
 
 (defn eval-button
-  []
-  [:button.btn.btn-primary.eval {:on-click #(dispatch [:eval-clicked])} "Evaluate"])
+  [dataset]
+  [:button.btn.btn-primary.eval {:on-click #(dispatch [:eval-clicked @dataset])} "Evaluate"])
 
 (defn excercises
   []
@@ -96,8 +97,8 @@
        [:h2 "Excercises"]
        [dataset-preview dataset]
        "Some excercises"
-       [editor dataset editor-content]
-       [eval-button]])))
+       [editor editor-content]
+       [eval-button dataset]])))
 
 (defn lesson
   []
