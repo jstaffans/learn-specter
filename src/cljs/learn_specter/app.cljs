@@ -1,5 +1,5 @@
 (ns learn-specter.app
-  (:require-macros [learn-specter.macros :refer [defcontent]]
+  (:require-macros [learn-specter.macros :refer [defpages]]
                    [reagent.ratom :refer [reaction]])
   (:require [cljs.pprint :refer [pprint]]
             [reagent.core :as reagent]
@@ -12,7 +12,7 @@
 
 (enable-console-print!)
 
-(defcontent pages "./src/md")
+(defpages pages "./src/md")
 
 ;; Handlers
 
@@ -49,6 +49,11 @@
          :dataset    (get-in @excercises [@current-page :dataset])
          :excercises (get-in @excercises [@current-page :excercises])}))))
 
+(register-sub
+  :current-input
+  (fn [db _]
+    (reaction (:current-input @db))))
+
 ;; Components
 
 (defn content
@@ -70,15 +75,12 @@
   [s]
   (clojure.string/replace s #"\)(\n)*$" "\n ...)"))
 
-(defn dataset
-  []
-  (let [curr (subscribe [:current-page])
-        first-movies (reaction (take 2 (:dataset @curr)))]
-    (fn dataset-renderer
-      []
-      [:div
-       "The dataset used for the excercises has the following form:"
-       [:pre (-> @first-movies pprint with-out-str add-ellipse)]])))
+(defn dataset-preview
+  [dataset]
+  (let [first-movies (take 2 @dataset)]
+    [:div
+     "The dataset used for the excercises has the following form:"
+     [:pre (-> first-movies pprint with-out-str add-ellipse)]]))
 
 (defn eval-button
   []
@@ -86,12 +88,16 @@
 
 (defn excercises
   []
-  [:section
-   [:h2 "Excercises"]
-   [dataset]
-   "Some excercises"
-   [editor]
-   [eval-button]])
+  (let [curr (subscribe [:current-page])
+        editor-content (subscribe [:current-input])
+        dataset (reaction (:dataset @curr))]
+    (fn []
+      [:section
+       [:h2 "Excercises"]
+       [dataset-preview dataset]
+       "Some excercises"
+       [editor dataset editor-content]
+       [eval-button]])))
 
 (defn lesson
   []

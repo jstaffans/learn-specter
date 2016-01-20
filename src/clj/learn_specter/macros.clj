@@ -9,7 +9,7 @@
   (let [content (edn/read-string (slurp (resource (str "edn/" edn-name))))]
     `(def ~symbol-name ~content)))
 
-(defmacro defcontent
+(defmacro defpages
   "Reads in the markdown files containing the tutorial content."
   [symbol-name path]
   (let [files (file-seq (file path))
