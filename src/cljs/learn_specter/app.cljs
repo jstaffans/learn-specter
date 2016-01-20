@@ -73,11 +73,11 @@
 (defn add-ellipse
   "Adds an ellipse at the end of a list, to indicate that the list is shown incomplete."
   [s]
-  (clojure.string/replace s #"\)(\n)*$" "\n ...)"))
+  (clojure.string/replace s #"\](\n)*$" " ...]"))
 
 (defn dataset-preview
   [dataset]
-  (let [first-movies (take 2 @dataset)]
+  (let [first-movies (s/select [(s/srange 0 2) s/ALL] @dataset)]
     [:div
      "The dataset used for the excercises has the following form:"
      [:pre (-> first-movies pprint with-out-str add-ellipse)]]))
