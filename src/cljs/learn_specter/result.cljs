@@ -1,6 +1,7 @@
 (ns learn-specter.result
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [cljs.js :as cljs]
+            [cljs.pprint :refer [pprint]]
             [cljs.tools.reader :refer [read-string]]
             [re-frame.core :refer [register-handler register-sub subscribe]]))
 
@@ -10,30 +11,28 @@
 
 (defn eval-str
   [s]
-  #_(.log js/console (str "Evaluating " s))
   (cljs/eval-str
     compiler-state
     s
     'learn-specter.eval
-    {:eval    cljs/js-eval
-     :ns      'learn-specter.eval}
+    {:eval cljs/js-eval
+     :ns   'learn-specter.eval}
     (fn [result] result)))
 
 (register-handler
   :eval-clicked
-  (fn [db [_ dataset]]
+  (fn [db]
     (if-let [input (:current-input db)]
-      (assoc
-        db
-        :current-result
-        (do (eval-str ns-str)
-            (eval-str (str "(let [ds " (str dataset) "] " input ")"))))
+      (assoc db :eval-input input)
       db)))
 
 (register-sub
   :result
   (fn [db _]
-    (let [result (reaction (:current-result @db))]
+    (let [eval-input (reaction (:eval-input @db))
+          current-excercise (subscribe [:current-excercise])
+          result (reaction (do (eval-str ns-str)
+                               (eval-str (str "(let [ds " (str (:dataset @current-excercise)) "] " @eval-input ")"))))]
       (reaction
         (if-let [error (:error @result)]
           (str "Error: " error)
@@ -44,6 +43,6 @@
   (let [result (subscribe [:result])]
     (fn []
       (when @result
-        [:pre (-> @result cljs.pprint/pprint with-out-str)]))))
+        [:pre (-> @result pprint with-out-str)]))))
 
 

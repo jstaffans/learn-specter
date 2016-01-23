@@ -19,10 +19,10 @@
 
 (register-handler
   :initialize
-  (fn [db _]
-    (merge db {:content      pages
-               :excercises   page-excercises
-               :current-page 0})))
+  (fn [_ _]
+    {:content      pages
+     :excercises   page-excercises
+     :current-page 0}))
 
 (register-handler
   :show-page
@@ -37,34 +37,37 @@
 ;; Subscriptions
 
 (register-sub
-  :current-page
-  (fn [db _]
+  :current-content
+  (fn [db [_]]
     (let [content (reaction (:content @db))
-          excercises (reaction (:excercises @db))
           current-page (reaction (:current-page @db))]
       (reaction
-        {:html       (get @content @current-page)
-         :links      (merge {}
-                       (when (< @current-page (-> @content count dec)) {:next (routes/path-for :page :id (inc @current-page))})
-                       (when (> @current-page 0) {:prev (routes/path-for :page :id (dec @current-page))}))
-         :dataset    (get-in @excercises [@current-page :dataset])
-         :excercises (get-in @excercises [@current-page :excercises])}))))
+        {:html  (get @content @current-page)
+         :links (merge {}
+                  (when (< @current-page (-> @content count dec)) {:next (routes/path-for :page :id (inc @current-page))})
+                  (when (> @current-page 0) {:prev (routes/path-for :page :id (dec @current-page))}))}))))
+
+(register-sub
+  :current-excercise
+  (fn [db [_]]
+    (let [current-page (reaction (-> db deref :current-page))]
+      (reaction (get (-> db deref :excercises) @current-page)))))
 
 (register-sub
   :current-input
-  (fn [db _]
+  (fn [db [_]]
     (reaction (:current-input @db))))
 
 ;; Components
 
 (defn content
   []
-  (let [curr (subscribe [:current-page])]
+  (let [content (subscribe [:current-content])]
     (fn content-renderer
       []
-      (let [html (get-in @curr [:html])
-            next (get-in @curr [:links :next])
-            prev (get-in @curr [:links :prev])]
+      (let [html (get-in @content [:html])
+            next (get-in @content [:links :next])
+            prev (get-in @content [:links :prev])]
         [:div
          [:div {:dangerouslySetInnerHTML {:__html html}}]
          [:section.nav
@@ -77,40 +80,42 @@
   (clojure.string/replace s #"\](\n)*$" " ...]"))
 
 (defn dataset-preview
-  [dataset]
-  (let [first-movies (s/select [(s/srange 0 2) s/ALL] @dataset)]
-    [:div
-     "The dataset used for the excercises has the following form:"
-     [:pre (-> first-movies pprint with-out-str add-ellipse)]]))
+  [preview]
+  [:div
+   "The dataset used for the excercises has the following form:"
+   [:pre (-> preview pprint with-out-str add-ellipse)]])
 
 (defn eval-button
-  [dataset]
-  [:button.btn.btn-primary.eval {:on-click #(dispatch [:eval-clicked @dataset])} "Evaluate"])
+  []
+  [:button.btn.btn-primary.eval {:on-click #(dispatch [:eval-clicked])} "Evaluate"])
 
 (defn excercises
   []
-  (let [curr (subscribe [:current-page])
-        editor-content (subscribe [:current-input])
-        dataset (reaction (:dataset @curr))]
+  (let [excercise (subscribe [:current-excercise])
+        editor-content (subscribe [:current-input])]
     (fn []
-      [:section
-       [:h2 "Excercises"]
-       [dataset-preview dataset]
-       "Some excercises"
-       [editor editor-content]
-       [eval-button dataset]])))
+      (let [{:keys [dataset preview-fn]} @excercise]
+        (.log js/console (clj->js dataset))
+        (.log js/console preview-fn)
+        [:section
+         [:h2 "Excercises"]
+         [dataset-preview (preview-fn dataset)]
+         "Some excercises"
+         [editor editor-content]
+         [eval-button]]))))
 
 (defn lesson
   []
-  [:div
-   [:div.row
-    [:div.col-md-7
-     [content]
-     [excercises]]
-    [:div.col-md-5.result
-     [result]]]
-   [:hr]
-   [:div.row]])
+  (fn []
+    [:div
+     [:div.row
+      [:div.col-md-7
+       [content]
+       [excercises]]
+      [:div.col-md-5.result
+       [result]]]
+     [:hr]
+     [:div.row]]))
 
 (defn init []
   (dispatch-sync [:initialize])
