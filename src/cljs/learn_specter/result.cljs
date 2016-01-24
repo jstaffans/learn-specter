@@ -30,13 +30,14 @@
   :result
   (fn [db _]
     (let [eval-input (reaction (:eval-input @db))
-          current-excercise (subscribe [:current-excercise])
-          result (reaction (do (eval-str ns-str)
-                               (eval-str (str "(let [ds " (str (:dataset @current-excercise)) "] " @eval-input ")"))))]
+          current-lesson (subscribe [:current-lesson])]
       (reaction
-        (if-let [error (:error @result)]
-          (str "Error: " error)
-          (:value @result))))))
+        (when @eval-input
+          (let [result (do (eval-str ns-str)
+                           (eval-str (str "(let [ds " (str (get-in @current-lesson [:excercises :dataset])) "] " @eval-input ")")))]
+            (if-let [value (:value result)]
+              value
+              :error)))))))
 
 (defn result
   []

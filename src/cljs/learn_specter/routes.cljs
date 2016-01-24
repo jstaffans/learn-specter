@@ -23,3 +23,37 @@
 
 (defn path-for [tag & args]
   (apply bidi/path-for routes tag args))
+
+(defn page-path
+  [page]
+  (path-for :page :id page))
+
+
+;(ns learn-specter.routes
+;  (:require-macros [secretary.core :refer [defroute]])
+;  (:import goog.History)
+;  (:require [secretary.core :as secretary]
+;            [goog.events :as events]
+;            [goog.history.EventType :as EventType]
+;            [re-frame.core :refer [dispatch]]))
+;
+;(defn hook-browser-navigation! []
+;  (doto (History.)
+;    (events/listen
+;      EventType/NAVIGATE
+;      (fn [event]
+;        (secretary/dispatch! (.-token event))))
+;    (.setEnabled true)))
+;
+;(defn init []
+;  (secretary/set-config! :prefix "#")
+;  ;; --------------------
+;  ;; define routes here
+;  (defroute "/" [] (dispatch [:show-page 0]))
+;
+;  (defroute page-path "/page/:id" {id :id} (dispatch [:show-page (int id)]))
+;
+;  ;; --------------------
+;  (hook-browser-navigation!))
+
+

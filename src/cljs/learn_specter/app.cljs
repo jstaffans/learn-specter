@@ -5,29 +5,39 @@
             [reagent.core :as reagent]
             [re-frame.core :refer [register-handler register-sub subscribe dispatch dispatch-sync]]
             [com.rpl.specter :as s]
-            [learn-specter.editor :refer [editor]]
+            [learn-specter.editor :refer [editor set-editor-value!]]
             [learn-specter.result :refer [result]]
             [learn-specter.routes :as routes]
             [learn-specter.excercises :refer [page-excercises]]))
 
-
 (enable-console-print!)
 
 (defpages pages "./src/md")
+
+(def num-pages (count pages))
+
+(defn content-for
+  [page]
+  (get pages page))
+
+(defn excercises-for
+  [page]
+  (get page-excercises page))
 
 ;; Handlers
 
 (register-handler
   :initialize
   (fn [_ _]
-    {:content      pages
-     :excercises   page-excercises
-     :current-page 0}))
+    {:current-page 0}))
 
 (register-handler
   :show-page
   (fn [db [_ page-id]]
-    (assoc db :current-page page-id :current-input nil)))
+    (set-editor-value! "")
+    (-> db
+        (assoc :current-page page-id)
+        (dissoc :current-input :eval-input))))
 
 (register-handler
   :input-changed
@@ -37,21 +47,15 @@
 ;; Subscriptions
 
 (register-sub
-  :current-content
+  :current-lesson
   (fn [db [_]]
-    (let [content (reaction (:content @db))
-          current-page (reaction (:current-page @db))]
+    (let [current-page (reaction (:current-page @db))]
       (reaction
-        {:html  (get @content @current-page)
-         :links (merge {}
-                  (when (< @current-page (-> @content count dec)) {:next (routes/path-for :page :id (inc @current-page))})
-                  (when (> @current-page 0) {:prev (routes/path-for :page :id (dec @current-page))}))}))))
-
-(register-sub
-  :current-excercise
-  (fn [db [_]]
-    (let [current-page (reaction (-> db deref :current-page))]
-      (reaction (get (-> db deref :excercises) @current-page)))))
+        {:content    {:html  (content-for @current-page)
+                      :links (merge {}
+                               (when (< @current-page (dec num-pages)) {:next (routes/page-path (inc @current-page))})
+                               (when (> @current-page 0) {:prev (routes/page-path (dec @current-page))}))}
+         :excercises (excercises-for @current-page)}))))
 
 (register-sub
   :current-input
@@ -60,19 +64,17 @@
 
 ;; Components
 
-(defn content
+(defn render-content
   []
-  (let [content (subscribe [:current-content])]
-    (fn content-renderer
-      []
-      (let [html (get-in @content [:html])
-            next (get-in @content [:links :next])
-            prev (get-in @content [:links :prev])]
-        [:div
-         [:div {:dangerouslySetInnerHTML {:__html html}}]
-         [:section.nav
-          (when prev [:a {:href prev} "Prev"])
-          (when next [:a {:href next} "Next"])]]))))
+  (fn [content]
+    (let [html (get-in content [:html])
+          next (get-in content [:links :next])
+          prev (get-in content [:links :prev])]
+      [:div
+       [:div {:dangerouslySetInnerHTML {:__html html}}]
+       [:section.nav
+        (when prev [:a {:href prev} "Prev"])
+        (when next [:a {:href next} "Next"])]])))
 
 (defn add-ellipse
   "Adds an ellipse at the end of a list, to indicate that the list is shown incomplete."
@@ -89,33 +91,36 @@
   []
   [:button.btn.btn-primary.eval {:on-click #(dispatch [:eval-clicked])} "Evaluate"])
 
-(defn excercises
-  []
-  (let [excercise (subscribe [:current-excercise])
-        editor-content (subscribe [:current-input])]
-    (fn []
-      (let [{:keys [dataset preview-fn]} @excercise]
-        (.log js/console (clj->js dataset))
-        (.log js/console preview-fn)
-        [:section
-         [:h2 "Excercises"]
-         [dataset-preview (preview-fn dataset)]
-         "Some excercises"
-         [editor editor-content]
-         [eval-button]]))))
+(defn render-excercises
+  [excercises editor-input]
+  (let [{:keys [dataset preview-fn]} excercises]
+    [:section
+     [:h2 "Excercises"]
+     [dataset-preview (preview-fn dataset)]
+     [:div
+      "Specter is available under the "
+      [:span.fixed-width "s"]
+      " namespace alias. The dataset is called "
+      [:span.fixed-width "ds"]
+      "."]
+     [editor editor-input]
+     [eval-button]]))
+
 
 (defn lesson
   []
   (fn []
-    [:div
-     [:div.row
-      [:div.col-md-7
-       [content]
-       [excercises]]
-      [:div.col-md-5.result
-       [result]]]
-     [:hr]
-     [:div.row]]))
+    (let [current-lesson (subscribe [:current-lesson])
+          editor-input (subscribe [:current-input])]
+      [:div
+       [:div.row
+        [:div.col-md-7
+         [render-content (:content @current-lesson)]
+         [render-excercises (:excercises @current-lesson) @editor-input]]
+        [:div.col-md-5.result
+         [result]]]
+       [:hr]
+       [:div.row]])))
 
 (defn init []
   (dispatch-sync [:initialize])

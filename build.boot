@@ -10,6 +10,7 @@
                   [reagent "0.5.0"]
                   [re-frame "0.7.0-alpha"]
                   [bidi "1.25.0"]
+                  [secretary "1.2.3"]
                   [kibu/pushy "0.3.6"]
                   [com.rpl/specter "0.9.1"]
                   [cljsjs/codemirror "5.8.0-0"]

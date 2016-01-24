@@ -16,6 +16,11 @@ div, p, span {
 	font-size: $font-size-base;
 }
 
+.fixed-width {
+  font-family: monospace;
+  background: #eee;
+}
+
 button.eval {
 	width: 100%;
 	margin-bottom: 20px;
