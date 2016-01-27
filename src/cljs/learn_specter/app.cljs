@@ -8,7 +8,8 @@
             [learn-specter.editor :refer [editor set-editor-value!]]
             [learn-specter.result :refer [result]]
             [learn-specter.routes :as routes]
-            [learn-specter.excercises :refer [page-excercises]]))
+            [learn-specter.excercises :refer [page-excercises]]
+            ))
 
 (defpages pages "./src/md")
 
@@ -27,7 +28,10 @@
 (register-handler
   :initialize
   (fn [_ _]
-    {:current-page 0}))
+    {:current-page 0
+     :excercises   (mapv
+                     #(assoc {} :active 1 :current-input "")
+                     page-excercises)}))
 
 (register-handler
   :show-page
@@ -63,17 +67,16 @@
 
 ;; Components
 
-(defn render-content
-  []
-  (fn [content]
-    (let [html (get-in content [:html])
-          next (get-in content [:links :next])
-          prev (get-in content [:links :prev])]
-      [:div
-       [:div {:dangerouslySetInnerHTML {:__html html}}]
-       [:section.nav
-        (when prev [:a {:href prev} "Prev"])
-        (when next [:a {:href next} "Next"])]])))
+(defn content
+  [c]
+  (let [html (get-in c [:html])
+        next (get-in c [:links :next])
+        prev (get-in c [:links :prev])]
+    [:div
+     [:div {:dangerouslySetInnerHTML {:__html html}}]
+     [:section.nav
+      (when prev [:a {:href prev} "Prev"])
+      (when next [:a {:href next} "Next"])]]))
 
 (defn add-ellipse
   "Adds an ellipse at the end of a list, to indicate that the list is shown incomplete."
@@ -88,10 +91,25 @@
 
 (defn eval-button
   []
-  [:button.btn.btn-primary.eval {:on-click #(dispatch [:eval-clicked])} "Evaluate"])
+  [:div.space-after
+   [:button.btn.btn-primary.eval {:on-click #(dispatch [:eval-clicked])} "Evaluate"]])
 
-(defn render-excercises
-  [excercises editor-input]
+(defn excercise-interaction
+  []
+  ;; TODO: subscribe to excercise state
+  (fn []
+    [:div
+     [:div.space-before.space-after
+      [:ul.nav.nav-tabs
+       [:li.active
+        [:a {:href "#"} "1"]]
+       [:li
+        [:a {:href "#"} "2"]]]]
+     [editor]
+     [eval-button]]))
+
+(defn excercises
+  [excercises]
   (let [{:keys [dataset preview-fn]} excercises]
     [:section
      [:h2 "Excercises"]
@@ -102,20 +120,17 @@
       " namespace alias. The dataset is called "
       [:span.fixed-width "ds"]
       "."]
-     [editor editor-input]
-     [eval-button]]))
-
+     [excercise-interaction]]))
 
 (defn lesson
   []
-  (fn []
-    (let [current-lesson (subscribe [:current-lesson])
-          editor-input (subscribe [:current-input])]
+  (let [current-lesson (subscribe [:current-lesson])]
+    (fn []
       [:div
        [:div.row
         [:div.col-md-7
-         [render-content (:content @current-lesson)]
-         [render-excercises (:excercises @current-lesson) @editor-input]]
+         [content (:content @current-lesson)]
+         [excercises (:excercises @current-lesson)]]
         [:div.col-md-5.result
          [result]]]
        [:hr]

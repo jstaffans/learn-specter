@@ -23,7 +23,14 @@ div, p, span {
 
 button.eval {
 	width: 100%;
-	margin-bottom: 20px;
+}
+
+.space-after {
+	margin-bottom: 18px;
+}
+
+.space-before {
+	margin-top: 18px;
 }
 
 .result {
@@ -32,14 +39,13 @@ button.eval {
 		position: fixed;
 		top: 0;
 		right: 0;
-		padding-top: 20px;
 		height: 100%;
 	}
 }
 
 pre {
-	margin-top: 20px;
-	margin-bottom: 20px;
+	@extend .space-before;
+	@extend .space-after;
 	font-size: 0.75em;
 }
 
