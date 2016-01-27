@@ -10,8 +10,6 @@
             [learn-specter.routes :as routes]
             [learn-specter.excercises :refer [page-excercises]]))
 
-(enable-console-print!)
-
 (defpages pages "./src/md")
 
 (def num-pages (count pages))
@@ -38,6 +36,7 @@
     (-> db
         (assoc :current-page page-id)
         (dissoc :current-input :eval-input))))
+
 
 (register-handler
   :input-changed
