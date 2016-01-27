@@ -25,7 +25,7 @@
     (.setValue editor value)))
 
 (defn editor
-  []
+  [input]
   (reagent/create-class
     {:component-did-mount
      (fn [this]
