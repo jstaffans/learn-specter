@@ -3,6 +3,9 @@
             [bidi.bidi :as bidi]
             [pushy.core :as pushy]))
 
+;; bidi works better for local development.
+;; Use secretary for hashbang navigation when deployed.
+
 (def routes
   ["/" {""                   :index
         ["page/" [long :id]] :page}])
