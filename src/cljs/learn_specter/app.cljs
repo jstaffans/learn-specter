@@ -9,7 +9,7 @@
             [learn-specter.result :refer [result]]
             [learn-specter.routes :as routes]
             [learn-specter.excercises :refer [page-excercises]]
-            ))
+            [devtools.core :as devtools]))
 
 (defpages pages "./src/md")
 
@@ -30,7 +30,9 @@
   (fn [_ _]
     {:current-page 0
      :excercises   (mapv
-                     #(assoc {} :active 1 :current-input "")
+                     #(assoc {}
+                       :active-task 0
+                       :editor-contents (mapv :hint (:tasks %)))
                      page-excercises)}))
 
 (register-handler
@@ -41,6 +43,10 @@
         (assoc :current-page page-id)
         (dissoc :current-input :eval-input))))
 
+(register-handler
+  :task-switched
+  (fn [db [_ task]]
+    (update-in db [:excercises (:current-page db)] #(assoc % :active-task task))))
 
 (register-handler
   :input-changed
@@ -59,6 +65,15 @@
                                (when (< @current-page (dec num-pages)) {:next (routes/page-path (inc @current-page))})
                                (when (> @current-page 0) {:prev (routes/page-path (dec @current-page))}))}
          :excercises (excercises-for @current-page)}))))
+
+(register-sub
+  :current-task
+  (fn [db [_]]
+    (let [current-page (reaction (:current-page @db))
+          excercise-state (reaction (nth (:excercises @db) @current-page))
+          active-task (reaction (:active-task @excercise-state))]
+      (reaction {:active-task    @active-task
+                 :editor-content (nth (:editor-contents @excercise-state) @active-task)}))))
 
 (register-sub
   :current-input
@@ -96,21 +111,24 @@
 
 (defn excercise-interaction
   []
-  ;; TODO: subscribe to excercise state
-  (fn []
-    [:div
-     [:div.space-before.space-after
-      [:ul.nav.nav-tabs
-       [:li.active
-        [:a {:href "#"} "1"]]
-       [:li
-        [:a {:href "#"} "2"]]]]
-     [editor]
-     [eval-button]]))
+  (let [current-task (subscribe [:current-task])]
+    ;; TODO: subscribe to excercise state
+    (fn [tasks]
+      [:div
+       [:div.space-before.space-after
+        [:ul.nav.nav-tabs
+         (doall
+           (map-indexed
+             (fn [i _]
+               [(if (= i (:active-task @current-task)) :li.active :li) {:key i}
+                [:a {:href "#" :on-click #(dispatch [:task-switched i])} (inc i)]])
+             tasks))]]
+       [editor]
+       [eval-button]])))
 
 (defn excercises
   [excercises]
-  (let [{:keys [dataset preview-fn]} excercises]
+  (let [{:keys [dataset preview-fn tasks]} excercises]
     [:section
      [:h2 "Excercises"]
      [dataset-preview (preview-fn dataset)]
@@ -120,7 +138,7 @@
       " namespace alias. The dataset is called "
       [:span.fixed-width "ds"]
       "."]
-     [excercise-interaction]]))
+     [excercise-interaction tasks]]))
 
 (defn lesson
   []
