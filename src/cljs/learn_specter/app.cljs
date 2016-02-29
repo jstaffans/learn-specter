@@ -1,84 +1,15 @@
 (ns learn-specter.app
-  (:require-macros [learn-specter.macros :refer [defpages]]
-                   [reagent.ratom :refer [reaction]])
   (:require [cljs.pprint :refer [pprint]]
             [reagent.core :as reagent]
-            [re-frame.core :refer [register-handler register-sub subscribe dispatch dispatch-sync]]
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [com.rpl.specter :as s]
-            [learn-specter.editor :refer [editor set-editor-value!]]
+            [learn-specter.editor :refer [editor]]
             [learn-specter.result :refer [result]]
             [learn-specter.routes :as routes]
-            [learn-specter.excercises :refer [page-excercises]]
+            [learn-specter.subs :as subs]
+            [learn-specter.handlers :as handlers]
             [devtools.core :as devtools]))
 
-(defpages pages "./src/md")
-
-(def num-pages (count pages))
-
-(defn content-for
-  [page]
-  (get pages page))
-
-(defn excercises-for
-  [page]
-  (get page-excercises page))
-
-;; Handlers
-
-(register-handler
-  :initialize
-  (fn [_ _]
-    {:current-page 0
-     :excercises   (mapv
-                     #(assoc {}
-                       :active-task 0
-                       :editor-contents (mapv :hint (:tasks %)))
-                     page-excercises)}))
-
-(register-handler
-  :show-page
-  (fn [db [_ page-id]]
-    (set-editor-value! "")
-    (-> db
-        (assoc :current-page page-id)
-        (dissoc :current-input :eval-input))))
-
-(register-handler
-  :task-switched
-  (fn [db [_ task]]
-    (update-in db [:excercises (:current-page db)] #(assoc % :active-task task))))
-
-(register-handler
-  :input-changed
-  (fn [db [_ input]]
-    (assoc db :current-input input)))
-
-;; Subscriptions
-
-(register-sub
-  :current-lesson
-  (fn [db [_]]
-    (let [current-page (reaction (:current-page @db))]
-      (reaction
-        {:content    {:html  (content-for @current-page)
-                      :links (merge {}
-                               (when (< @current-page (dec num-pages)) {:next (routes/page-path (inc @current-page))})
-                               (when (> @current-page 0) {:prev (routes/page-path (dec @current-page))}))}
-         :excercises (excercises-for @current-page)}))))
-
-(register-sub
-  :current-task
-  (fn [db [_]]
-    (let [current-page (reaction (:current-page @db))
-          excercise-state (reaction (nth (:excercises @db) @current-page))
-          active-task (reaction (:active-task @excercise-state))]
-      (reaction {:active-task    @active-task
-                 :editor-content (nth (:editor-contents @excercise-state) @active-task)}))))
-
-(register-sub
-  :current-input
-  (fn [db [_]]
-    (reaction (:current-input @db))))
 
 ;; Components
 
@@ -154,10 +85,12 @@
        [:hr]
        [:div.row]])))
 
+
+;; entry point
+
 (defn init []
   (dispatch-sync [:initialize])
   (routes/init)
   (reagent/render-component
     [lesson]
     (.getElementById js/document "container")))
-
