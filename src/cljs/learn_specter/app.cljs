@@ -8,7 +8,7 @@
             [learn-specter.routes :as routes]
             [learn-specter.subs :as subs]
             [learn-specter.handlers :as handlers]
-            [devtools.core :as devtools]))
+            ))
 
 ;; Components
 
@@ -85,11 +85,15 @@
        [:div.row]])))
 
 
+(defn mount-root
+  []
+  (reagent/render-component
+   [lesson]
+   (.getElementById js/document "container")))
+
 ;; entry point
 
 (defn init []
   (dispatch-sync [:initialize])
   (routes/init)
-  (reagent/render-component
-    [lesson]
-    (.getElementById js/document "container")))
+  (mount-root))
