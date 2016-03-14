@@ -6,7 +6,6 @@
                   [adzerk/boot-reload "0.4.1" :scope "test"]
                   [pandeiro/boot-http "0.6.3" :scope "test"]
                   [mathias/boot-sassc "0.1.1" :scope "test"]
-                  [binaryage/devtools "0.5.2"]
                   [org.clojure/clojurescript "1.7.228"]
                   [reagent "0.5.0"]
                   [re-frame "0.7.0-alpha"]
@@ -26,31 +25,32 @@
 
 (deftask build []
          (comp (cljs)
-               (sass :output-dir "css")))
+            (sass :output-dir "css")))
 
 (deftask run []
-         (comp (serve)
-               (watch)
-               (cljs-repl)
-               (reload)
-               (build)))
+  (comp (serve)
+     (watch)
+     (cljs-repl)
+     (reload)
+     (build)))
 
 (deftask production []
-         (task-options! cljs {:optimizations :advanced}
-                        sass {:output-style "compressed"})
-         identity)
+  (task-options! cljs {:optimizations :advanced}
+                 sass {:output-style "compressed"})
+  identity)
 
 (deftask development []
-         (task-options! cljs {:optimizations :none :source-map true}
-                        reload {:on-jsload 'learn-specter.app/init}
-                        sass {:line-numbers true
-                              :source-maps  true})
-         identity)
+  ;; TODO: install devtools automatically
+  (set-env! :source-paths #(conj % "dev/cljs")
+            :dependencies #(conj % '[binaryage/devtools "0.5.2"]))
+  (task-options! cljs {:optimizations :none :source-map true}
+                 reload {:on-jsload 'learn-specter.app/init}
+                 sass {:line-numbers true
+                       :source-maps  true})
+  identity)
 
 (deftask dev
          "Simple alias to run application in development mode"
          []
          (comp (development)
-               (run)))
-
-
+            (run)))
