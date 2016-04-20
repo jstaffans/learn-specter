@@ -3,5 +3,8 @@
 
 ;; note: unsure how to include this in boot build process
 
-(devtools/enable-feature! :sanity-hints :dirac)
-(devtools/install!)
+(comment
+  (require '[devtools.core :as devtools])
+  (devtools/enable-feature! :sanity-hints :dirac)
+  (devtools/install!)
+  )
