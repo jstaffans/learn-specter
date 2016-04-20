@@ -42,19 +42,20 @@
 (defn excercise-interaction
   []
   (let [current-task (subscribe [:current-task])]
-    ;; TODO: subscribe to excercise state
     (fn [tasks]
-      [:div
-       [:div.space-before.space-after
-        [:ul.nav.nav-tabs
-         (doall
-           (map-indexed
+      (let [task (get tasks (:active-task @current-task))]
+        [:div
+         [:div.space-before.space-after
+          [:ul.nav.nav-tabs
+           (doall
+            (map-indexed
              (fn [i _]
                [(if (= i (:active-task @current-task)) :li.active :li) {:key i}
                 [:a {:href "#" :on-click #(dispatch [:task-switched i])} (inc i)]])
              tasks))]]
-       [editor]
-       [eval-button]])))
+         [:div.space-before.space-after (:text task)]
+        [editor]
+        [eval-button]]))))
 
 (defn excercises
   [excercises]
