@@ -8,7 +8,7 @@
             [learn-specter.routes :as routes]
             [learn-specter.subs :as subs]
             [learn-specter.handlers :as handlers]
-            ))
+            [devtools.core :as devtools]))
 
 ;; Components
 
@@ -97,4 +97,6 @@
 (defn init []
   (dispatch-sync [:initialize])
   (routes/init)
+  (devtools/enable-feature! :sanity-hints :dirac)
+  (devtools/install!)
   (mount-root))
