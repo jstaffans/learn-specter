@@ -8,6 +8,10 @@
 
 ;; Subscriptions
 
+;; TODO:
+;; * move pages, content stuff to separata namespace
+;; * build up a signal graph with reg-sub, pure functions, add tests
+
 (defpages pages "./src/md")
 
 (def num-pages (count pages))
